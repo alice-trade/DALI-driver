@@ -10,4 +10,4 @@
 8. cd DALI-driver
 9. make
 10. make util
-11. insmod DALI-driver.ko
+11. insmod DALI_driver.ko
