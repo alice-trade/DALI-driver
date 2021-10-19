@@ -220,7 +220,6 @@ read_timer_func (struct hrtimer * hrtimer) {
 			if (dali_bus.receive_bits != 0) {
 		    	dali_bus.receive_data 		= dali_bus.receive_data << 1;
 		    	dali_bus.receive_data 		= dali_bus.receive_data | val;
-		    	printk("test=%06x %02x\n", dali_bus.receive_data, dali_bus.seq);
 			}
 			dali_bus.receive_bits++;
 	    }
@@ -233,9 +232,7 @@ read_timer_func (struct hrtimer * hrtimer) {
 
 		return HRTIMER_RESTART;
 	}
-//	if (dali_bus.seq != 0xff) {
-		dali_bus.receive_data = dali_bus.receive_data | (dali_bus.seq << 16);
-//	}
+	dali_bus.receive_data = dali_bus.receive_data | (dali_bus.seq << 16);
 	printk("Receive dali packet (%d): %06x\n", dali_bus.receive_bits, dali_bus.receive_data);
 
 	fifo_push(&reply_queue, dali_bus.receive_data);									// Сохраняем принятые данные в очереди
