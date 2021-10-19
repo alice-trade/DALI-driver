@@ -24,6 +24,7 @@ send_command(int fd, char *command) {
     sprintf(buffer, "%02x%4s", seq, command);
     write(fd, buffer, 6);
     seq+=1;
+    if (seq == 0xff) seq = 0;
 }
 
 void 
