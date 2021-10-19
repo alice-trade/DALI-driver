@@ -42,7 +42,7 @@ main(int argc, char* argv[]) {
 
     fds.fd	= fd;
     fds.events	= POLLIN;
-
+l:
     ret = poll( &fds, 1, 34);
 
     switch (ret) {
@@ -54,6 +54,7 @@ main(int argc, char* argv[]) {
     	    break;
 	default:
 	    read(fd, buffer, len);
+	    if (buffer[0]=='f' && buffer[1]=='f') goto l;
 	    printf("%s", buffer);
 	    break;
     }

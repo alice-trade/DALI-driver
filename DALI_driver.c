@@ -54,11 +54,6 @@
 
 //--------------------- define structures -------------------
 
-typedef struct reply_queue_t {
-    void				*data;
-} reply_queue_t;
-
-
 typedef struct manchesterCodeList_t {
     struct manchesterCodeList_t *pNext;
     unsigned char 		bitVal;
@@ -71,7 +66,7 @@ typedef struct dali_bus_t {
     uint8_t				prev_bit;
     uint8_t				receive_bits;
     uint32_t			receive_data;
-    int16_t				seq;
+    uint8_t				seq;
 } dali_bus_t;
 
 typedef struct {
@@ -162,6 +157,9 @@ static void qDaliSend_worker( struct work_struct *work) {
     wait_for_completion(&data_read_done);											// ждем окончания отправки
 
     dali_bus.dali_status 	= DALI_STATUS_IDLE;
+
+    if (my_work->seq == 0xff) my_work->seq = 0;
+
     dali_bus.seq 			= my_work->seq;
 
 	hrtimer_start(&wait_backward_timer, DALI_22TE, HRTIMER_MODE_REL);				// запускаем таймер на 22 Te
@@ -222,6 +220,7 @@ read_timer_func (struct hrtimer * hrtimer) {
 			if (dali_bus.receive_bits != 0) {
 		    	dali_bus.receive_data 		= dali_bus.receive_data << 1;
 		    	dali_bus.receive_data 		= dali_bus.receive_data | val;
+		    	printk("test=%06x %02x\n", dali_bus.receive_data, dali_bus.seq);
 			}
 			dali_bus.receive_bits++;
 	    }
@@ -234,10 +233,9 @@ read_timer_func (struct hrtimer * hrtimer) {
 
 		return HRTIMER_RESTART;
 	}
-	if (dali_bus.seq != -1) {
-//		uint32_t tmp = dali_bus.seq << 16;
+//	if (dali_bus.seq != 0xff) {
 		dali_bus.receive_data = dali_bus.receive_data | (dali_bus.seq << 16);
-	}
+//	}
 	printk("Receive dali packet (%d): %06x\n", dali_bus.receive_bits, dali_bus.receive_data);
 
 	fifo_push(&reply_queue, dali_bus.receive_data);									// Сохраняем принятые данные в очереди
@@ -246,7 +244,7 @@ read_timer_func (struct hrtimer * hrtimer) {
 	dali_bus.stop_bits		= 0;
 	dali_bus.receive_bits	= 0;
 	dali_bus.receive_data	= 0;
-	dali_bus.seq			= -1;
+	dali_bus.seq			= 0xff;
 
 	return HRTIMER_NORESTART;
 }
@@ -292,7 +290,7 @@ wait_backward_timer_func(struct hrtimer * hrtimer) {
 
 		return HRTIMER_RESTART;
 	}
-	dali_bus.seq = -1;
+	dali_bus.seq = 0xff;
 
 	return HRTIMER_NORESTART;
 }
@@ -535,7 +533,7 @@ init_dali_driver(void) {
 	dali_bus.prev_bit				= 0;
 	dali_bus.receive_bits			= 0;
 	dali_bus.receive_data			= 0;
-	dali_bus.seq					= -1;
+	dali_bus.seq					= 0xff;
 
 	dali_bit_half_period_time		= ktime_set(0, DALI_BIT_HALF_PERIOD);
 
