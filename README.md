@@ -1,4 +1,4 @@
-# DALI-driver
+# DALI Driver for Raspberry
 
 1. sudo rpi-update
 2. sudo reboot
