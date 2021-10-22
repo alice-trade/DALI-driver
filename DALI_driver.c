@@ -208,6 +208,9 @@ read_timer_func (struct hrtimer * hrtimer) {
 	int val;
 
 	val 	= gpio_get_value(DALI_IN_PORT);
+
+	if (val) val = 0;else val = 1;			// testing hack
+
 	n 		= ktime_get();
 	delta 	= n - last_irq;
 
@@ -301,18 +304,18 @@ manchesterListAddVal(uint8_t val) {
 
 	switch(val) {
     	    case 0:
-    			pTemp->bitVal 			= 1;
-    			pTemp->pNext->bitVal 	= 0;
+    			pTemp->bitVal 			= 0; //1;
+    			pTemp->pNext->bitVal 	= 1; //0;
     			break;
 
     	    case DALI_STOPBIT_VAL:
-    			pTemp->bitVal 			= 1;
-    			pTemp->pNext->bitVal 	= 1;
+    			pTemp->bitVal 			= 0; //1;
+    			pTemp->pNext->bitVal 	= 0; //1;
     			break;
 
     	    default:
-    			pTemp->bitVal 			= 0;
-    			pTemp->pNext->bitVal 	= 1;
+    			pTemp->bitVal 			= 1; //0;
+    			pTemp->pNext->bitVal 	= 0; //1;
     			break;
 	}
 
